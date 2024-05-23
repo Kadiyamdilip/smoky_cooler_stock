@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cooler Stock Checklist</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        .brand {
+            margin: 20px 0;
+        }
+        .drink {
+            margin: 10px 0;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Cooler Stock Checklist</h1>
+        <form id="stockForm">
+            <div class="brand">
+                <h2>Tropical Fantasy</h2>
+                <div class="drink">
+                    <label for="tropical_fantasy_strawberry">Strawberry: </label>
+                    <input type="number" id="tropical_fantasy_strawberry" name="tropical_fantasy_strawberry" min="0" required>
+                </div>
+                <div class="drink">
+                    <label for="tropical_fantasy_mango">Mango: </label>
+                    <input type="number" id="tropical_fantasy_mango" name="tropical_fantasy_mango" min="0" required>
+                </div>
+                <div class="drink">
+                    <label for="tropical_fantasy_grape">Grape: </label>
+                    <input type="number" id="tropical_fantasy_grape" name="tropical_fantasy_grape" min="0" required>
+                </div>
+                <!-- Add more flavors as needed -->
+            </div>
+			<div class="brand">
+                <h2>Arizona</h2>
+                <div class="drink">
+                    <label for="Arizona_strawberry">Strawberry: </label>
+                    <input type="number" id="Arizona_strawberry" name="Arizona_strawberry" min="0" required>
+                </div>
+                <div class="drink">
+                    <label for="Arizona_mango">Mango: </label>
+                    <input type="number" id="Arizona_mango" name="Arizona_mango" min="0" required>
+                </div>
+                <div class="drink">
+                    <label for="Arizona_grape">Grape: </label>
+                    <input type="number" id="Arizona_grape" name="Arizona_grape" min="0" required>
+                </div>
+                <!-- Add more flavors as needed -->
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+        <div id="message"></div>
+    </div>
+    <script>
+        document.getElementById('stockForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const threshold = 5;  // Set the threshold value
+            let message = '';
+            const stockData = [];
+
+            // Process each drink flavor
+            const drinks = [
+                {id: 'tropical_fantasy_strawberry', name: 'Tropical Fantasy Strawberry'},
+                {id: 'tropical_fantasy_mango', name: 'Tropical Fantasy Mango'},
+                {id: 'tropical_fantasy_grape', name: 'Tropical Fantasy Grape'},
+				{id: 'Arizona_strawberry', name: 'Arizona Strawberry'},
+                {id: 'Arizona_mango', name: 'Arizona Mango'},
+                {id: 'Arizona_grape', name: 'Arizona Grape'},
+                // Add more flavors as needed
+            ];
+
+            drinks.forEach(drink => {
+                let value = document.getElementById(drink.id).value;
+                stockData.push([drink.name, value]);
+                if (value < threshold) {
+                    message += `${drink.name} stock is low. Please order more.\n`;
+                }
+            });
+
+            document.getElementById('message').innerText = message;
+
+            // Prepare data for Excel
+            const data = [
+                ["Drink", "bottles Left"],
+                ...stockData
+            ];
+
+            const worksheet = XLSX.utils.aoa_to_sheet(data);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Stock");
+
+            // Create an Excel file
+            const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+            const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+
+            // Create a link and trigger the download
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'stock_checklist.xlsx';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+    </script>
+</body>
+</html>
